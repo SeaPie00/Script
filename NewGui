@@ -1,0 +1,406 @@
+-- Create a new ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MySquareGUI"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a frame for the window
+local window = Instance.new("Frame")
+window.Name = "Window"
+window.Size = UDim2.new(0, 600, 0, 400)
+window.Position = UDim2.new(0.5, -300, 0.5, -200)
+window.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+window.BackgroundTransparency = 0.65 -- Set initial transparency
+window.BorderSizePixel = 0
+window.Active = true
+window.Draggable = true
+window.Parent = screenGui
+
+-- Create a panel for the name bar
+local nameBar = Instance.new("Frame")
+nameBar.Name = "NameBar"
+nameBar.Size = UDim2.new(1, 0, 0, 50)
+nameBar.Position = UDim2.new(0, 0, 0, 0)
+nameBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+nameBar.BackgroundTransparency = 0.65 -- Set initial transparency
+nameBar.BorderSizePixel = 0
+nameBar.Active = true
+nameBar.Parent = window
+
+-- Create a label for the name bar
+local nameLabel = Instance.new("TextLabel")
+nameLabel.Name = "NameLabel"
+nameLabel.Text = "Trenches 5P1D3R5_Scripts"
+nameLabel.Size = UDim2.new(0.8, 0, 1, 0)
+nameLabel.Position = UDim2.new(0, 0, 0, 0)
+nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+nameLabel.BackgroundTransparency = 1
+nameLabel.Font = Enum.Font.SourceSans
+nameLabel.TextSize = 24
+nameLabel.Parent = nameBar
+
+-- Create an options button
+local optionsButton = Instance.new("TextButton")
+optionsButton.Name = "OptionsButton"
+optionsButton.Text = "Options"
+optionsButton.Size = UDim2.new(0.2, 0, 1, 0)
+optionsButton.Position = UDim2.new(0.8, 0, 0, 0)
+optionsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+optionsButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+optionsButton.BorderSizePixel = 0
+optionsButton.Font = Enum.Font.SourceSans
+optionsButton.TextSize = 24
+optionsButton.Parent = nameBar
+
+-- Create a side panel for tabs
+local sidePanel = Instance.new("Frame")
+sidePanel.Name = "SidePanel"
+sidePanel.Size = UDim2.new(0, 150, 1, -50)
+sidePanel.Position = UDim2.new(0, 0, 0, 50)
+sidePanel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+sidePanel.BackgroundTransparency = 0.65 -- Set initial transparency
+sidePanel.BorderSizePixel = 0
+sidePanel.Parent = window
+
+-- Create a content area for displaying tab content
+local contentArea = Instance.new("Frame")
+contentArea.Name = "ContentArea"
+contentArea.Size = UDim2.new(1, -150, 1, -50)
+contentArea.Position = UDim2.new(0, 150, 0, 50)
+contentArea.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+contentArea.BackgroundTransparency = 0.65 -- Set initial transparency
+contentArea.BorderSizePixel = 0
+contentArea.Parent = window
+
+-- Create an options panel
+local optionsPanel = Instance.new("Frame")
+optionsPanel.Name = "OptionsPanel"
+optionsPanel.Size = UDim2.new(1, 0, 1, 0)
+optionsPanel.Position = UDim2.new(0, 0, 0, 0)
+optionsPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+optionsPanel.BackgroundTransparency = 0.65 -- Set initial transparency
+optionsPanel.BorderSizePixel = 0
+optionsPanel.Visible = false
+optionsPanel.Parent = contentArea
+
+-- Watermark label
+local watermarkLabel = Instance.new("TextLabel")
+watermarkLabel.Name = "WatermarkLabel"
+watermarkLabel.Text = "Created by Seapie (Discord realseapie)"
+watermarkLabel.Size = UDim2.new(1, 0, 0, 30)
+watermarkLabel.Position = UDim2.new(0, 0, 1, -30)
+watermarkLabel.TextColor3 = Color3.fromRGB(150, 150, 150) -- Gray color
+watermarkLabel.BackgroundTransparency = 1
+watermarkLabel.Font = Enum.Font.SourceSans
+watermarkLabel.TextSize = 18
+watermarkLabel.Parent = optionsPanel
+
+-- Create a dropdown for theme selection
+local themeDropdown = Instance.new("TextButton")
+themeDropdown.Name = "ThemeDropdown"
+themeDropdown.Text = "Select Theme"
+themeDropdown.Size = UDim2.new(1, -20, 0.13, -20)
+themeDropdown.Position = UDim2.new(0, 10, 0.35, 0)  -- Adjusted position
+themeDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+themeDropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+themeDropdown.BorderSizePixel = 0
+themeDropdown.Font = Enum.Font.SourceSans
+themeDropdown.TextSize = 24
+themeDropdown.Parent = optionsPanel
+
+-- Dropdown options frame
+local dropdownOptions = Instance.new("Frame")
+dropdownOptions.Name = "DropdownOptions"
+dropdownOptions.Size = UDim2.new(1, 0, 0, 450)  -- Adjusted size
+dropdownOptions.Position = UDim2.new(0, 0, 0.35, 0)  -- Adjusted position
+dropdownOptions.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+dropdownOptions.BorderSizePixel = 0
+dropdownOptions.Visible = false
+dropdownOptions.Parent = optionsPanel
+
+-- Function to create dropdown options
+local function createDropdownOption(text, position, callback)
+    local option = Instance.new("TextButton")
+    option.Name = text .. "Option"
+    option.Text = text
+    option.Size = UDim2.new(1, 0, 0, 50)
+    option.Position = position
+    option.TextColor3 = Color3.fromRGB(255, 255, 255)
+    option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    option.BorderSizePixel = 0
+    option.Font = Enum.Font.SourceSans
+    option.TextSize = 24
+    option.Parent = dropdownOptions
+    
+    option.MouseButton1Click:Connect(callback)
+    return option
+end
+
+-- Theme color definitions
+local themes = {
+    Default = {
+        windowColor = Color3.fromRGB(60, 60, 60),
+        nameBarColor = Color3.fromRGB(60, 60, 60),
+        sidePanelColor = Color3.fromRGB(60, 60, 60),
+        contentAreaColor = Color3.fromRGB(60, 60, 60),
+        textColor = Color3.fromRGB(255, 255, 255)
+    },
+    Light = {
+        windowColor = Color3.fromRGB(255, 255, 255),
+        nameBarColor = Color3.fromRGB(255, 255, 255),
+        sidePanelColor = Color3.fromRGB(255, 255, 255),
+        contentAreaColor = Color3.fromRGB(255, 255, 255),
+        textColor = Color3.fromRGB(0, 0, 0)
+    },
+    Dark = {
+        windowColor = Color3.fromRGB(45, 45, 45),
+        nameBarColor = Color3.fromRGB(45, 45, 45),
+        sidePanelColor = Color3.fromRGB(45, 45, 45),
+        contentAreaColor = Color3.fromRGB(45, 45, 45),
+        textColor = Color3.fromRGB(255, 255, 255)
+    },
+    Grape = {
+        windowColor = Color3.fromRGB(150, 0, 220),
+        nameBarColor = Color3.fromRGB(150, 0, 220),
+        sidePanelColor = Color3.fromRGB(150, 0, 220),
+        contentAreaColor = Color3.fromRGB(150, 0, 220),
+        textColor = Color3.fromRGB(255, 255, 255)
+    },
+    Blood = {
+        windowColor = Color3.fromRGB(180, 0, 0),
+        nameBarColor = Color3.fromRGB(180, 0, 0),
+        sidePanelColor = Color3.fromRGB(180, 0, 0),
+        contentAreaColor = Color3.fromRGB(180, 0, 0),
+        textColor = Color3.fromRGB(255, 255, 255)
+    },
+    Ocean = {
+        windowColor = Color3.fromRGB(0, 160, 220),
+        nameBarColor = Color3.fromRGB(0, 160, 220),
+        sidePanelColor = Color3.fromRGB(0, 160, 220),
+        contentAreaColor = Color3.fromRGB(0, 160, 220),
+        textColor = Color3.fromRGB(255, 255, 255)
+    },
+    Midnight = {
+        windowColor = Color3.fromRGB(50, 50, 140),
+        nameBarColor = Color3.fromRGB(50, 50, 140),
+        sidePanelColor = Color3.fromRGB(50, 50, 140),
+        contentAreaColor = Color3.fromRGB(50, 50, 140),
+        textColor = Color3.fromRGB(255, 255, 255)
+    },
+    Sentinel = {
+        windowColor = Color3.fromRGB(60, 60, 60),
+        nameBarColor = Color3.fromRGB(60, 60, 60),
+        sidePanelColor = Color3.fromRGB(60, 60, 60),
+        contentAreaColor = Color3.fromRGB(60, 60, 60),
+        textColor = Color3.fromRGB(255, 0, 0)
+    },
+    Synapse = {
+        windowColor = Color3.fromRGB(60, 60, 60),
+        nameBarColor = Color3.fromRGB(60, 60, 60),
+        sidePanelColor = Color3.fromRGB(60, 60, 60),
+        contentAreaColor = Color3.fromRGB(60, 60, 60),
+        textColor = Color3.fromRGB(255, 165, 0) -- Orange text color
+    }
+}
+
+-- Function to change theme
+local function changeTheme(themeName)
+    local theme = themes[themeName]
+    window.BackgroundColor3 = theme.windowColor
+    nameBar.BackgroundColor3 = theme.nameBarColor
+    sidePanel.BackgroundColor3 = theme.sidePanelColor
+    contentArea.BackgroundColor3 = theme.contentAreaColor
+    nameLabel.TextColor3 = theme.textColor
+    optionsButton.TextColor3 = theme.textColor
+end
+
+-- Add dropdown options
+local themeNames = {"Default", "Light", "Dark", "Grape", "Blood", "Ocean", "Midnight", "Sentinel", "Synapse"}
+for i, themeName in ipairs(themeNames) do
+    createDropdownOption(themeName, UDim2.new(0, 0, 0, (i - 1) * 50), function()
+        themeDropdown.Text = themeName
+        dropdownOptions.Visible = false
+        changeTheme(themeName)
+    end)
+end
+
+-- Show/hide dropdown options on click
+themeDropdown.MouseButton1Click:Connect(function()
+    dropdownOptions.Visible = not dropdownOptions.Visible
+end)
+
+-- Function to create a new tab button
+local function createTabButton(name, position, callback)
+    local tabButton = Instance.new("TextButton")
+    tabButton.Name = name .. "Tab"
+    tabButton.Text = name
+    tabButton.Size = UDim2.new(1, 0, 0, 50)
+    tabButton.Position = position
+    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    tabButton.BorderSizePixel = 0
+    tabButton.Font = Enum.Font.SourceSans
+    tabButton.TextSize = 24
+    tabButton.Parent = sidePanel
+    
+    tabButton.MouseButton1Click:Connect(callback)
+    return tabButton
+end
+
+-- Function to create tab content
+local function createTabContent(name)
+    local tabContent = Instance.new("Frame")
+    tabContent.Name = name .. "Content"
+    tabContent.Size = UDim2.new(1, 0, 1, 0)
+    tabContent.Position = UDim2.new(0, 0, 0, 0)
+    tabContent.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    tabContent.BorderSizePixel = 0
+    tabContent.Visible = false
+    tabContent.Parent = contentArea
+
+    local contentLabel = Instance.new("TextLabel")
+    contentLabel.Name = "ContentLabel"
+    contentLabel.Text = "This is the content for " .. name
+    contentLabel.Size = UDim2.new(1, 0, 1, 0)
+    contentLabel.Position = UDim2.new(0, 0, 0, 0)
+    contentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    contentLabel.BackgroundTransparency = 1
+    contentLabel.Font = Enum.Font.SourceSans
+    contentLabel.TextSize = 24
+    contentLabel.Parent = tabContent
+
+    return tabContent
+end
+
+-- Keybind for toggling UI
+local UserInputService = game:GetService("UserInputService")
+local uiVisible = true -- Initial state of the UI
+
+-- Function to toggle the UI visibility
+local function toggleUI()
+    uiVisible = not uiVisible
+    screenGui.Enabled = uiVisible
+end
+
+-- Toggle UI on Insert key press
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Insert then
+        toggleUI()
+    end
+end)
+
+-- Dragging functionality
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+-- Function to update window position while dragging
+local function update(input)
+    local delta = input.Position - dragStart
+    window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+-- Start dragging on mouse click
+nameBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = window.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+-- Track mouse movement while dragging
+nameBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+-- Apply position update while dragging
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        update(input)
+    end
+end)
+
+-- Function to handle options button click
+optionsButton.MouseButton1Click:Connect(function()
+    optionsPanel.Visible = not optionsPanel.Visible
+end)
+
+-- Set the default theme on GUI load
+changeTheme("Default")
+
+-- Create a slider for transparency control
+local transparencySliderLabel = Instance.new("TextLabel")
+transparencySliderLabel.Name = "TransparencySliderLabel"
+transparencySliderLabel.Text = "Transparency"
+transparencySliderLabel.Size = UDim2.new(1, -20, 0, 20)
+transparencySliderLabel.Position = UDim2.new(0, 10, 0.2, 0)
+transparencySliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+transparencySliderLabel.BackgroundTransparency = 1
+transparencySliderLabel.Font = Enum.Font.SourceSans
+transparencySliderLabel.TextSize = 18
+transparencySliderLabel.Parent = optionsPanel
+
+local transparencySlider = Instance.new("Frame")
+transparencySlider.Name = "TransparencySlider"
+transparencySlider.Size = UDim2.new(1, -20, 0, 20)
+transparencySlider.Position = UDim2.new(0, 10, 0.25, 0)
+transparencySlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+transparencySlider.BorderSizePixel = 0
+transparencySlider.Parent = optionsPanel
+
+local sliderBar = Instance.new("Frame")
+sliderBar.Name = "SliderBar"
+sliderBar.Size = UDim2.new(0.35, 0, 1, 0)
+sliderBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sliderBar.BorderSizePixel = 0
+sliderBar.Parent = transparencySlider
+
+local draggingSlider = false
+
+-- Functionality for dragging the transparency slider
+transparencySlider.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingSlider = true
+    end
+end)
+
+transparencySlider.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingSlider = false
+    end
+end)
+
+transparencySlider.InputChanged:Connect(function(input)
+    if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local relativeX = math.clamp((input.Position.X - transparencySlider.AbsolutePosition.X) / transparencySlider.AbsoluteSize.X, 0, 1)
+        sliderBar.Size = UDim2.new(relativeX, 0, 1, 0)
+        local transparencyValue = relativeX
+        window.BackgroundTransparency = transparencyValue
+        nameBar.BackgroundTransparency = transparencyValue
+        sidePanel.BackgroundTransparency = transparencyValue
+        contentArea.BackgroundTransparency = transparencyValue
+        optionsPanel.BackgroundTransparency = transparencyValue
+    end
+end)
+
+-- Prevent dragging the window while interacting with the slider
+transparencySlider.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        window.Active = false
+    end
+end)
+
+transparencySlider.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        window.Active = true
+    end
+end)
