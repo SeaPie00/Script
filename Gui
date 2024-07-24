@@ -1,0 +1,432 @@
+--[[
+    =======================================
+    Script: (  Universal 5P1D3R5 Scripts )
+    Author: SeaPie
+    =======================================
+    Made by SeaPie
+    =======================================
+]]
+
+local function seaPieWatermark()
+    -- This function is a hidden watermark for the script
+    -- Made by SeaPie
+    return " Universal 5P1D3R5 Scripts "
+end
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib(" Universal 5P1D3R5 Scripts ", "BloodTheme")
+
+-- Visuals
+local EspTab = Window:NewTab("Visuals")
+local ESPToggle = EspTab:NewSection("Tracers")
+local ESP = EspTab:NewSection("Box Esp")
+local ChamsSection = EspTab:NewSection("Chams settings")
+
+local dwEntities = game:GetService("Players")
+local dwLocalPlayer = dwEntities.LocalPlayer
+local dwRunService = game:GetService("RunService")
+
+local settings_tbl = {
+    ESP_Enabled = false,
+    ESP_TeamCheck = false,
+    Chams = true,
+    Chams_Color = Color3.fromRGB (0, 0, 0),
+    Chams_Transparency = 0.1,
+    Chams_Glow_Color = Color3.fromRGB (255, 255, 255),
+    BoxESP_Enabled = false,
+    BoxESP_TeamColor = Color3.new(0, 1, 0),  -- Green color for team
+    BoxESP_EnemyColor = Color3.new(1, 0, 0)  -- Red color for enemy
+}
+
+local function destroy_chams(char)
+    for _, v in next, char:GetChildren() do
+        if v:IsA("BasePart") and v.Transparency ~= 1 then
+            if v:FindFirstChild("Glow") and v:FindFirstChild("Chams") then
+                v.Glow:Destroy()
+                v.Chams:Destroy()
+            end
+        end
+    end
+end
+
+local function apply_chams()
+    for _, v in next, dwEntities:GetPlayers() do
+        if v ~= dwLocalPlayer then
+            if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and
+               v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+
+                if not settings_tbl.ESP_TeamCheck or v.Team ~= dwLocalPlayer.Team then
+                    local char = v.Character
+
+                    for _, b in next, char:GetChildren() do
+                        if b:IsA("BasePart") and b.Transparency ~= 1 then
+                            if settings_tbl.Chams then
+                                if not b:FindFirstChild("Glow") and not b:FindFirstChild("Chams") then
+                                    local chams_box = Instance.new("BoxHandleAdornment", b)
+                                    chams_box.Name = "Chams"
+                                    chams_box.AlwaysOnTop = true
+                                    chams_box.ZIndex = 4
+                                    chams_box.Adornee = b
+                                    chams_box.Color3 = settings_tbl.Chams_Color
+                                    chams_box.Transparency = settings_tbl.Chams_Transparency
+                                    chams_box.Size = b.Size + Vector3.new(0.02, 0.02, 0.02)
+
+                                    local glow_box = Instance.new("BoxHandleAdornment", b)
+                                    glow_box.Name = "Glow"
+                                    glow_box.AlwaysOnTop = false
+                                    glow_box.ZIndex = 3
+                                    glow_box.Adornee = b
+                                    glow_box.Color3 = settings_tbl.Chams_Glow_Color
+                                    glow_box.Size = chams_box.Size + Vector3.new(0.13, 0.13, 0.13)
+                                end
+                            else
+                                destroy_chams(char)
+                            end
+                        end
+                    end
+                else
+                    destroy_chams(v.Character)
+                end
+            else
+                destroy_chams(v.Character)
+            end
+        end
+    end
+end
+
+dwRunService.Heartbeat:Connect(function()
+    if settings_tbl.ESP_Enabled then
+        apply_chams()
+    else
+        for _, v in next, dwEntities:GetPlayers() do
+            if v ~= dwLocalPlayer and v.Character and
+               v.Character:FindFirstChild("HumanoidRootPart") and
+               v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+
+                destroy_chams(v.Character)
+            end
+        end
+    end
+end)
+
+-- Add toggle for Chams
+ChamsSection:NewToggle("Chams", "Toggles Chams", function(state)
+    settings_tbl.ESP_Enabled = state
+    if not state then
+        for _, v in next, dwEntities:GetPlayers() do
+            if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                destroy_chams(v.Character)
+            end
+        end
+        print("Toggle Off")
+    else
+        print("Toggle On")
+    end
+end)
+
+-- Add color picker for Chams Color
+ChamsSection:NewColorPicker("Chams Color", "Change the color of Chams", settings_tbl.Chams_Color, function(color)
+    settings_tbl.Chams_Color = color
+    if settings_tbl.ESP_Enabled then
+        apply_chams()  -- Reapply chams with the new color
+    end
+end)
+
+-- Add color picker for Glow Color
+ChamsSection:NewColorPicker("Glow Color", "Change the color of Glow", settings_tbl.Chams_Glow_Color, function(color)
+    settings_tbl.Chams_Glow_Color = color
+    if settings_tbl.ESP_Enabled then
+        apply_chams()  -- Reapply chams with the new glow color
+    end
+end)
+
+-- ESP Box Section
+local lplr = game.Players.LocalPlayer
+local camera = game:GetService("Workspace").CurrentCamera
+local CurrentCamera = workspace.CurrentCamera
+local worldToViewPortPoint = CurrentCamera.WorldToViewportPoint
+
+local HeadOff = Vector3.new(0, 0.5, 0)
+local LegOff = Vector3.new(0, 3, 0)
+
+local function createESPBox(v)
+    local Boxoutline = Drawing.new("Square")
+    Boxoutline.Visible = false
+    Boxoutline.Color = Color3.new(0, 0, 0)
+    Boxoutline.Thickness = 3
+    Boxoutline.Transparency = 1
+    Boxoutline.Filled = false
+    
+    local Box = Drawing.new("Square")
+    Box.Visible = false
+    Box.Color = settings_tbl.BoxESP_EnemyColor
+    Box.Thickness = 1
+    Box.Transparency = 1
+    Box.Filled = false
+
+    local function updateBoxColors()
+        if v.TeamColor == lplr.TeamColor then
+            Box.Color = settings_tbl.BoxESP_TeamColor
+        else
+            Box.Color = settings_tbl.BoxESP_EnemyColor
+        end
+    end
+
+    local function boxesp()
+        local connection
+        connection = game:GetService("RunService").RenderStepped:Connect(function()
+            if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= lplr and v.Character.Humanoid.Health > 0 then
+                local RootPart = v.Character.HumanoidRootPart
+                local Head = v.Character.Head
+                local RootPosition, RootVis = worldToViewPortPoint(CurrentCamera, RootPart.Position)
+                local HeadPosition = worldToViewPortPoint(CurrentCamera, Head.Position + HeadOff)
+                local LegPosition = worldToViewPortPoint(CurrentCamera, RootPart.Position - LegOff)
+
+                if RootVis then
+                    Boxoutline.Size = Vector2.new(1000 / RootPosition.Z, HeadPosition.Y - LegPosition.Y)
+                    Boxoutline.Position = Vector2.new(RootPosition.X - Boxoutline.Size.X / 2, RootPosition.Y - Boxoutline.Size.Y / 2)
+                    Boxoutline.Visible = settings_tbl.BoxESP_Enabled
+
+                    Box.Size = Vector2.new(1000 / RootPosition.Z, HeadPosition.Y - LegPosition.Y)
+                    Box.Position = Vector2.new(RootPosition.X - Box.Size.X / 2, RootPosition.Y - Box.Size.Y / 2)
+                    Box.Visible = settings_tbl.BoxESP_Enabled
+
+                    updateBoxColors()
+                else    
+                    Boxoutline.Visible = false
+                    Box.Visible = false
+                end
+            else
+                Boxoutline.Visible = false
+                Box.Visible = false
+            end
+        end)
+
+        -- Disconnect the render step when the player is removed
+        v.AncestryChanged:Connect(function(_, parent)
+            if not parent then
+                connection:Disconnect()
+                Boxoutline:Remove()
+                Box:Remove()
+            end
+        end)
+    end
+    coroutine.wrap(boxesp)()
+end
+
+for _, v in pairs(game.Players:GetPlayers()) do
+    if v ~= lplr then
+        createESPBox(v)
+    end
+end
+
+game.Players.PlayerAdded:Connect(function(v)
+    if v ~= lplr then
+        createESPBox(v)
+    end
+end)
+
+-- Add toggle for Box ESP
+ESP:NewToggle("Box ESP", "Toggles Box ESP", function(state)
+    settings_tbl.BoxESP_Enabled = state
+    print("Box ESP " .. (state and "Enabled" or "Disabled"))
+end)
+
+-- Add color picker for Box ESP Team Color
+ESP:NewColorPicker("Box ESP Team Color", "Change the color of Box ESP for your team", settings_tbl.BoxESP_TeamColor, function(color)
+    settings_tbl.BoxESP_TeamColor = color
+end)
+
+-- Add color picker for Box ESP Enemy Color
+ESP:NewColorPicker("Box ESP Enemy Color", "Change the color of Box ESP for enemies", settings_tbl.BoxESP_EnemyColor, function(color)
+    settings_tbl.BoxESP_EnemyColor = color
+end)
+
+-- Aim Tab
+local AimTab = Window:NewTab("Aim")
+local AimSection = AimTab:NewSection("AimLock")
+local aimEnabled = false
+local aimKey = Enum.KeyCode.E -- Change this to your preferred key
+local aimFOV = 100 -- Field of view for aiming
+
+-- Add Aimlock Toggle
+AimSection:NewToggle("Aimlock", "Toggle Aimlock", function(state)
+    aimEnabled = state
+end)
+
+-- Add FOV Slider
+AimSection:NewSlider("FOV", "Adjust Aimlock FOV", 0, 360, aimFOV, function(value)
+    aimFOV = value
+end)
+
+-- Local Player and Services
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local uis = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local camera = game.Workspace.CurrentCamera
+
+-- Variables for aim logic
+local lockedPlayer = nil
+local aimEnabled = false
+local aimFOV = 100 -- Field of View for aiming
+local teleportThreshold = -100 -- Adjust this value based on your map's layout
+
+-- Function to get the closest opponent player to the mouse cursor
+local function getClosestOpponent()
+    local closestPlayer = nil
+    local shortestDistance = aimFOV
+
+    for _, targetPlayer in pairs(game.Players:GetPlayers()) do
+        if targetPlayer ~= player and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer.Team ~= player.Team then
+            local targetPos = camera:WorldToViewportPoint(targetPlayer.Character.HumanoidRootPart.Position)
+            local distance = (Vector2.new(targetPos.X, targetPos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestPlayer = targetPlayer
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+-- Function to aim at the player's torso
+local function aimAtPlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        local targetPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if targetPart then
+            local aimDirection = (targetPart.Position - camera.CFrame.Position).unit
+            local targetCFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + aimDirection)
+            camera.CFrame = camera.CFrame:Lerp(targetCFrame, 0.2) -- Smooth aiming
+        end
+    end
+end
+
+-- Function to check if player is at low HP or under map
+local function isPlayerAtLowHPOrUnderMap(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+        local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if humanoid and (humanoid.Health <= 1 or (hrp and hrp.Position.Y < teleportThreshold)) then
+            return true
+        end
+    end
+    return false
+end
+
+-- Function to reset aim lock
+local function resetAimLock()
+    aimEnabled = false
+    lockedPlayer = nil
+end
+
+-- Handler for player's death
+local function onPlayerDied()
+    resetAimLock()
+end
+
+-- Connect player's death event
+if player.Character and player.Character:FindFirstChild("Humanoid") then
+    player.Character.Humanoid.Died:Connect(onPlayerDied)
+end
+
+-- Toggle aim lock with a key press
+uis.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.E then
+        aimEnabled = not aimEnabled
+        if not aimEnabled then
+            resetAimLock()
+        end
+    end
+end)
+
+-- Render Stepped to update aim
+runService.RenderStepped:Connect(function()
+    if aimEnabled then
+        if lockedPlayer then
+            if isPlayerAtLowHPOrUnderMap(lockedPlayer) or lockedPlayer.Team == player.Team then
+                resetAimLock()
+            else
+                aimAtPlayer(lockedPlayer)
+            end
+        else
+            lockedPlayer = getClosestOpponent()
+        end
+    end
+end)
+
+-- Misc
+local MiscTab = Window:NewTab("Misc")
+local Walkspeedtoggle = MiscTab:NewSection("WALKSPEED")
+local SuperJumpToggle = MiscTab:NewSection("SUPER JUMP")
+local AutClickerToggle = MiscTab:NewSection("AutoClickerPressF")
+
+Walkspeedtoggle:NewToggle("Walkspeed", "Makes you the Flash", function(state)
+    if state then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 120
+    else
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end
+end)
+
+SuperJumpToggle:NewToggle("SuperJump", "Gives Super Jump", function(state)
+    if state then
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 120
+    else
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+    end
+end)
+
+local autoTapEnabled = false
+local uiAutoTapEnabled = false
+
+local function autoTap()
+    while autoTapEnabled do
+        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 0)
+        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 0)
+
+        wait(0.1)
+    end
+end
+
+AutClickerToggle:NewToggle("AutoClicker", "Toggles Auto Clicker with F key", function(state)
+    uiAutoTapEnabled = state
+    if uiAutoTapEnabled then
+        print("AutoClicker UI Enabled")
+    else
+        autoTapEnabled = false
+        print("AutoClicker UI Disabled")
+    end
+end)
+
+-- Keybind to toggle auto-tap
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if uiAutoTapEnabled and not gameProcessed and input.KeyCode == Enum.KeyCode.F then
+        autoTapEnabled = not autoTapEnabled
+        print("AutoTap " .. (autoTapEnabled and "Enabled" or "Disabled"))
+        if autoTapEnabled then
+            spawn(autoTap)
+        end
+    end
+end)
+
+-- Keybind for toggling UI
+local UserInputService = game:GetService("UserInputService")
+local uiVisible = true -- Initial state of the UI
+
+-- Function to toggle the UI visibility
+local function toggleUI()
+    uiVisible = not uiVisible
+    Library:ToggleUI(uiVisible)
+end
+
+-- Bind a key (e.g., "Insert") to toggle the UI
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Insert then
+        toggleUI()
+    end
+end)
+
